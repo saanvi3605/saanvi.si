@@ -28,7 +28,8 @@
   --accent:#e8b86d; --accent-soft:#2c2419; --chip:#23222b;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+section,header{scroll-margin-top:60px}
 body{background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased}
 a{color:inherit}
 .wrap{max-width:980px;margin:0 auto;padding:0 24px}
@@ -42,11 +43,30 @@ nav .wrap{display:flex;align-items:center;justify-content:space-between;height:6
 .links{display:flex;gap:22px;align-items:center}
 .links a{text-decoration:none;font-size:14px;color:var(--muted);transition:color .2s}
 .links a:hover{color:var(--ink)}
-#theme{background:none;border:1px solid var(--line);color:var(--ink);border-radius:999px;width:34px;height:34px;cursor:pointer;font-size:15px}
-@media (max-width:720px){.links a.hide-sm{display:none}}
+#theme,#menu{background:none;border:1px solid var(--line);color:var(--ink);border-radius:999px;width:36px;height:36px;cursor:pointer;font-size:15px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+#menu{display:none}
+#menu span,#menu span::before,#menu span::after{display:block;width:14px;height:1.5px;background:currentColor;border-radius:2px;position:relative;transition:transform .2s,background .2s}
+#menu span::before,#menu span::after{content:"";position:absolute;left:0}
+#menu span::before{top:-5px}
+#menu span::after{top:5px}
+nav.open #menu span{background:transparent}
+nav.open #menu span::before{transform:translateY(5px) rotate(45deg)}
+nav.open #menu span::after{transform:translateY(-5px) rotate(-45deg)}
+.nav-btns{display:flex;gap:8px;align-items:center}
+@media (max-width:720px){
+  #menu{display:inline-flex}
+  .links{gap:10px}
+  .links .nav-links{display:none;position:absolute;top:60px;left:0;right:0;flex-direction:column;align-items:stretch;gap:0;background:var(--bg);border-bottom:1px solid var(--line);padding:6px 16px 12px}
+  nav.open .links .nav-links{display:flex}
+  .nav-links a{padding:13px 0;font-size:16px;border-bottom:1px solid var(--line)}
+  .nav-links a:last-child{border-bottom:none}
+}
+.nav-links{display:flex;gap:22px;align-items:center}
 
 /* hero */
-.hero{padding:96px 0 72px}
+.hero{padding-top:96px;padding-bottom:72px}
+@media (max-width:600px){.hero{padding-top:56px;padding-bottom:48px}section{padding:56px 0}.contact{padding:72px 0}.card{padding:22px}.stat{padding:18px 16px}.stat b{font-size:26px}.sec-head{margin-bottom:26px}.cta .btn{flex:1 1 auto;justify-content:center}}
+@media (max-width:360px){.stats{grid-template-columns:1fr}}
 .eyebrow{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--accent);letter-spacing:.04em}
 h1{font-family:Fraunces,serif;font-weight:300;font-size:clamp(40px,7vw,72px);line-height:1.05;margin:18px 0 24px;letter-spacing:-.02em}
 h1 em{font-style:italic;color:var(--accent)}
@@ -59,7 +79,7 @@ h1 em{font-style:italic;color:var(--accent)}
 .stat{background:var(--surface);padding:22px 20px}
 .stat b{display:block;font-family:Fraunces,serif;font-size:30px;font-weight:400;color:var(--accent)}
 .stat small{color:var(--muted);font-size:13px;line-height:1.4;display:block}
-@media (max-width:720px){.stats{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:860px){.stats{grid-template-columns:repeat(2,1fr)}}
 
 /* sections */
 section{padding:72px 0;border-top:1px solid var(--line)}
@@ -126,11 +146,17 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
   <div class="wrap">
     <a href="#top" class="logo">saanvi<span>.si</span></a>
     <div class="links">
-      <a href="#research" class="hide-sm">Research</a>
-      <a href="#experience" class="hide-sm">Experience</a>
-      <a href="#projects" class="hide-sm">Projects</a>
-      <a href="#contact">Contact</a>
-      <button id="theme" aria-label="Toggle colour theme">◐</button>
+      <div class="nav-links" id="nav-links">
+        <a href="#research">Research</a>
+        <a href="#experience">Experience</a>
+        <a href="#projects">Projects</a>
+        <a href="#education">Education</a>
+        <a href="#contact">Contact</a>
+      </div>
+      <div class="nav-btns">
+        <button id="theme" aria-label="Toggle colour theme"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg></button>
+        <button id="menu" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links"><span></span></button>
+      </div>
     </div>
   </div>
 </nav>
@@ -348,6 +374,14 @@ document.getElementById('theme').addEventListener('click', () => {
   root.dataset.theme = dark ? 'light' : 'dark';
   try { localStorage.setItem('theme', root.dataset.theme); } catch(e){}
 });
+const nav = document.querySelector('nav'), menu = document.getElementById('menu');
+menu.addEventListener('click', () => {
+  const open = nav.classList.toggle('open');
+  menu.setAttribute('aria-expanded', open);
+});
+document.querySelectorAll('.nav-links a').forEach(a => a.addEventListener('click', () => {
+  nav.classList.remove('open'); menu.setAttribute('aria-expanded', 'false');
+}));
 const io = new IntersectionObserver(es => es.forEach(e => {
   if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
 }), {threshold: .12});
